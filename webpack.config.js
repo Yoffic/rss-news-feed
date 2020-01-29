@@ -1,5 +1,4 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack'); //to access built-in plugins
 const path = require('path');
 
 module.exports = {
@@ -7,7 +6,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'index_bundle.js'
+    filename: 'index_bundle.js',
   },
   module: {
     rules: [
@@ -25,11 +24,11 @@ module.exports = {
     ],
   },
   devServer: {
-    port: 3000
+    port: 3000,
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html',
-    })
-  ]
-}
+    }),
+  ],
+};
