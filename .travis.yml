@@ -2,7 +2,7 @@
 
 env:
   global:
-    - CC_TEST_REPORTER_ID=4f9177cab8523a9404de37e5f0acb9ed425ac99aa99316421711c6456b89f20f
+    - CC_TEST_REPORTER_ID=8430ed1a1637cb685c77b3e4cd64b935d0e64d8f451e4996223cbff6223341db
 
 language: node_js
 
