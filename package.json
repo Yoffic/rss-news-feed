@@ -21,6 +21,13 @@
     "url": "https://github.com/Yoffic/frontend-project-lvl3/issues"
   },
   "homepage": "https://github.com/Yoffic/frontend-project-lvl3#readme",
+  "jest": {
+    "verbose": true,
+    "testURL": "http://localhost/"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.8.3"
+  },
   "devDependencies": {
     "@babel/core": "^7.8.3",
     "@babel/preset-env": "^7.8.3",
