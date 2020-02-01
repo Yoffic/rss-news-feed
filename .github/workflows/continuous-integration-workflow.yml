@@ -6,8 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -name: Install Dependencies
-      run: make install
+      -run: make install
       -name: Lint
-      run: make lint
+      -run: make lint
       -name: Build
-      run: make build
+      -run: make build
