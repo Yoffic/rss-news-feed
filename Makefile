@@ -7,6 +7,7 @@ develop:
 build:
 	rm -rf public
 	NODE_ENV=production npx webpack
+	now --prod
 
 lint:
 	npx eslint .

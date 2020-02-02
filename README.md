@@ -1,4 +1,4 @@
 ## RSS News Feed
 [![Maintainability](https://api.codeclimate.com/v1/badges/2954c16c7aa1c9d39623/maintainability)](https://codeclimate.com/github/Yoffic/frontend-project-lvl3/maintainability)
 
-This is frontend study project RSS News Feed. [Preview is here]()
+This is frontend study project RSS News Feed. [Preview is here](https://frontend-project-lvl3.now.sh/)
