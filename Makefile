@@ -1,5 +1,5 @@
 install:
-	npm install install-flow-typed
+	npm install
 
 develop:
 	npx webpack-dev-server
