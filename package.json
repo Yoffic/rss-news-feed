@@ -5,7 +5,7 @@
   "main": "",
   "scripts": {
     "test": "jest",
-    "build": "make build"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
