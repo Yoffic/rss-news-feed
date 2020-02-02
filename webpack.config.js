@@ -5,8 +5,8 @@ module.exports = {
   mode: process.env.NODE_ENV || 'development',
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'index_bundle.js',
+    path: path.resolve(__dirname, 'public'),
+    filename: 'bundle.js',
   },
   module: {
     rules: [

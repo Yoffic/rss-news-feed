@@ -2,10 +2,10 @@
   "name": "rss-feed",
   "version": "0.0.1",
   "description": "rss news feed",
-  "main": "dist/index.js",
+  "main": "",
   "scripts": {
     "test": "jest",
-    "build": "webpack"
+    "build": "make build"
   },
   "repository": {
     "type": "git",
