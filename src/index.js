@@ -1,8 +1,10 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import _ from 'lodash';
+import axios from 'axios';
 
 import * as yup from 'yup';
 import { watch } from 'melanke-watchjs';
+import parseRSS from './parser';
 
 const errorMessage = {
   url: 'Введите действующий адрес сайта',
@@ -20,15 +22,18 @@ const isValidUrl = (text) => {
     .then((valid) => valid);
 };
 
-const isAdded = (text, state) => state.url.data.includes(text);
+const isAdded = (text, data) => {
+  const added = data.filter((channel) => _.includes(channel, text));
+  return added.length > 0;
+};
 
-const validate = (text, state) => {
+const validate = (text, data) => {
   const errors = {};
   return isValidUrl(text).then((valid) => {
     if (!valid) {
       errors.url = errorMessage.url;
     }
-    if (isAdded(text, state)) {
+    if (isAdded(text, data)) {
       errors.double = errorMessage.double;
     }
     return errors;
@@ -36,7 +41,7 @@ const validate = (text, state) => {
 };
 
 const updateValidationState = (state) => {
-  validate(state.form.urlField, state)
+  validate(state.form.urlField, state.feed.channels)
     .then((errors) => {
       const { form } = state;
       form.errors = errors;
@@ -51,8 +56,8 @@ const state = {
     valid: false,
     errors: {},
   },
-  url: {
-    data: [],
+  feed: {
+    channels: [],
   },
 };
 
@@ -65,12 +70,24 @@ field.addEventListener('input', (e) => {
   updateValidationState(state);
 });
 
+const proxy = 'cors-anywhere.herokuapp.com';
+
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   state.form.processState = 'fulfilled';
-  state.url.data.push(state.form.urlField);
+  const channelData = {
+    name: state.form.urlField,
+  };
+  const link = state.form.urlField;
+  const requestUrl = `https://${proxy}/${link}`;
+  axios.get(requestUrl)
+    .then((response) => {
+      const feedData = parseRSS(response);
+      channelData.data = feedData;
+    });
+  state.feed.channels.push(channelData);
   state.form.urlField = '';
-  console.log(state.url);
+  console.log(state);
 });
 
 watch(state.form, 'errors', () => {
