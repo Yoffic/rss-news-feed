@@ -1,17 +1,22 @@
 const parseRSS = (data) => {
   const domparser = new DOMParser();
-  const doc = domparser.parseFromString(data.data, 'text/xml');
-
-  const feedData = {};
-  feedData.title = doc.querySelector('title').textContent;
-  feedData.description = doc.querySelector('description').textContent;
+  const doc = domparser.parseFromString(data, 'text/xml');
+  if (doc.firstChild.tagName !== 'rss') {
+    return {};
+  }
   const [...items] = doc.querySelectorAll('item');
-  const elems = items.map((item) => {
-    const title = item.querySelector('title').textContent;
-    const link = item.querySelector('link').textContent;
-    return { title, link };
+  const mappedItems = items.map((item) => {
+    const element = {
+      title: item.querySelector('title').textContent,
+      link: item.querySelector('link').textContent,
+    };
+    return element;
   });
-  feedData.items = elems;
+  const feedData = {
+    title: doc.querySelector('title').textContent,
+    description: doc.querySelector('description').textContent,
+    items: mappedItems,
+  };
 
   return feedData;
 };
