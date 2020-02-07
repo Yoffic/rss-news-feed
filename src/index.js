@@ -56,8 +56,10 @@ form.addEventListener('submit', (e) => {
       if (!feedData) {
         errors.data = errorFeedMessages.data;
         state.form.processState = 'finished';
+        state.form.valid = false;
       } else {
         state.form.processState = 'finished';
+        state.form.valid = false;
         const channelData = {
           name: link,
           data: feedData,
@@ -70,9 +72,11 @@ form.addEventListener('submit', (e) => {
       if (error.response.status === 404) {
         errors.direction = errorFeedMessages.direction;
         state.form.processState = 'finished';
+        state.form.valid = false;
       } else if (error.request) {
         errors.base = errorFeedMessages.base;
         state.form.processState = 'finished';
+        state.form.valid = false;
       }
     })
     .then(() => {
