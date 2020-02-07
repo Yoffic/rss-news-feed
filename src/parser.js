@@ -2,7 +2,7 @@ const parseRSS = (data) => {
   const domparser = new DOMParser();
   const doc = domparser.parseFromString(data, 'text/xml');
   if (doc.firstChild.tagName !== 'rss') {
-    return {};
+    return null;
   }
   const [...items] = doc.querySelectorAll('item');
   const mappedItems = items.map((item) => {
