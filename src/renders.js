@@ -57,8 +57,13 @@ export default (state) => {
 
   watch(state.feed, 'channels', () => {
     const { channels } = state.feed;
-    channels.forEach(({ data }) => {
+    channels.forEach(({ data, id }) => {
+      const feedElement = document.getElementById(id);
+      if (feedElement) {
+        feedElement.remove();
+      }
       const channel = document.createElement('div');
+      channel.id = id;
       const title = document.createElement('h2');
       title.innerHTML = data.title;
       const description = document.createElement('p');
