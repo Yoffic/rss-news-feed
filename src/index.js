@@ -36,20 +36,28 @@ field.addEventListener('input', (e) => {
 });
 
 const proxy = 'cors-anywhere.herokuapp.com';
+const errorFeedMessages = {
+  data: 'Check the RSS channel. There is no RSS data for display.',
+  direction: 'URL not found. Please try again.',
+  base: 'Network problems. Please try again.',
+};
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
-  state.form.processState = 'fulfilled';
+  state.form.processState = 'sending';
   const link = state.form.urlField;
   const requestUrl = `https://${proxy}/${link}`;
+  state.form.urlField = '';
+  const errors = {};
 
   axios.get(requestUrl)
     .then((response) => {
       const feedData = parseRSS(response.data);
-      if (_.isEqual(feedData, {})) {
-        state.feed.errors.data = 'There is no RSS data.';
-        state.form.processState = 'filling';
+      if (!feedData) {
+        errors.data = errorFeedMessages.data;
+        state.form.processState = 'finished';
       } else {
+        state.form.processState = 'finished';
         const channelData = {
           name: link,
           data: feedData,
@@ -59,13 +67,17 @@ form.addEventListener('submit', (e) => {
       }
     })
     .catch((error) => {
-      state.feed.errors.base = 'Network problems. Try again.';
-      state.form.processState = 'filling';
-      throw error;
-    }).then(() => {
-      state.form.urlField = '';
+      if (error.response.status === 404) {
+        errors.direction = errorFeedMessages.direction;
+        state.form.processState = 'finished';
+      } else if (error.request) {
+        errors.base = errorFeedMessages.base;
+        state.form.processState = 'finished';
+      }
+    })
+    .then(() => {
+      state.feed.errors = errors;
     });
-  console.log(state);
 });
 
 render(state);
