@@ -14,7 +14,7 @@ const parseRSS = (data) => {
   });
   const feedData = {
     title: doc.querySelector('title').textContent,
-    description: doc.querySelector('description').textContent,
+    desc: doc.querySelector('description').textContent,
     items: mappedItems,
   };
 
