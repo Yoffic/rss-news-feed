@@ -65,30 +65,37 @@ export default (state) => {
     subscribeForm.after(feedbackMessage);
   });
 
-  watch(feed, 'channels', () => {
-    const { channels } = feed;
-    channels.forEach(({ data, id }) => {
-      const feedElement = document.getElementById(id);
+  watch(feed.data, 'items', () => {
+    const { names, items } = feed.data;
+    names.forEach((channel) => {
+      const feedElement = document.getElementById(channel.id);
       if (feedElement) {
         feedElement.remove();
       }
-      const channel = document.createElement('div');
-      channel.id = id;
+
+      const feedChannel = document.createElement('div');
+      feedChannel.id = channel.id;
       const title = document.createElement('h2');
-      title.innerHTML = data.title;
+      title.innerHTML = channel.title;
+      feedChannel.appendChild(title);
+
       const description = document.createElement('p');
-      description.innerHTML = data.description;
+      description.innerHTML = channel.description;
+      feedChannel.appendChild(description);
+
       const news = document.createElement('ul');
-      data.items.forEach((item) => {
+      const [feedRSS] = items.filter((item) => item.id === channel.id);
+      feedRSS.links.forEach((item) => {
         const listItem = document.createElement('li');
+        news.appendChild(listItem);
         const link = document.createElement('a');
         link.innerHTML = item.title;
         link.href = item.link;
-        listItem.append(link);
-        news.append(listItem);
+        listItem.appendChild(link);
       });
-      channel.append(title, description, news);
-      banner.after(channel);
+      feedChannel.appendChild(news);
+
+      banner.after(feedChannel);
     });
   });
 };
