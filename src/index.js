@@ -7,15 +7,6 @@ import render from './renders';
 import parseRSS from './parser';
 import validate from './validator';
 
-const updateValidationState = (state) => (
-  validate(state.feed.channels, state.form.urlField)
-    .then((errors) => {
-      const { form } = state;
-      form.errors = errors;
-      form.valid = isEqual(errors, {});
-    })
-);
-
 const state = {
   form: {
     processState: 'filling',
@@ -33,33 +24,39 @@ const state = {
   },
 };
 
-const form = document.getElementById('form');
-const field = document.getElementById('url-address');
+const createFeedData = (link, data) => {
+  const id = uniqueId();
+  const name = {
+    id,
+    title: data.title,
+    description: data.desc,
+  };
+  const items = { id, links: data.items };
+  state.feed.channels = [{ link, id }, ...state.feed.channels];
+  state.feed.data.names = [name, ...state.feed.data.names];
+  state.feed.data.items = [items, ...state.feed.data.items];
+};
 
-field.addEventListener('input', (e) => {
-  state.form.urlField = e.target.value;
-  updateValidationState(state);
-});
+const updateFeedData = (id, data) => {
+  const [dataToUpdate] = state.feed.data.items.filter((item) => item.id === id);
+  console.log(dataToUpdate);
+  data.items.forEach((element) => {
+    const [newLink] = dataToUpdate.links.filter((item) => isEqual(item, element));
+    if (!newLink) {
+      dataToUpdate.links = [element, ...dataToUpdate.links];
+    }
+  });
+  const unchangedItems = state.feed.data.items.filter((item) => item.id !== id);
+  state.feed.data.items = [dataToUpdate, ...unchangedItems];
+};
 
 const addFeedData = (link, feedData) => {
   const [addedChannel] = state.feed.channels.filter((channel) => channel.link === link);
+  console.log(addedChannel);
   if (addedChannel) {
-    const updatedFeedData = state.feed.data.items.filter((item) => item.id !== addedChannel.id);
-    state.feed.data.items = updatedFeedData;
-    const updatedFeedItems = { id: addedChannel.id, links: feedData.items };
-    state.feed.data.items.push(updatedFeedItems);
-    console.log(state.feed.data.items);
+    updateFeedData(addedChannel.id, feedData);
   } else {
-    const id = uniqueId();
-    const name = {
-      id,
-      title: feedData.title,
-      description: feedData.desc,
-    };
-    const items = { id, links: feedData.items };
-    state.feed.channels = [{ link, id }, ...state.feed.channels];
-    state.feed.data.names = [name, ...state.feed.data.names];
-    state.feed.data.items = [items, state.feed.data.items];
+    createFeedData(link, feedData);
   }
 };
 
@@ -71,7 +68,7 @@ const getRSS = (link) => {
 
   i18next.init({
     lng: 'en',
-    debug: true,
+    debug: false,
     resources,
   }).then((t) => {
     axios.get(requestUrl)
@@ -85,7 +82,7 @@ const getRSS = (link) => {
           state.form.processState = 'finished';
           state.form.valid = false;
           addFeedData(link, feedData);
-          setTimeout(() => getRSS(link), 30000);
+          setTimeout(() => getRSS(link), 5000);
         }
       })
       .catch((error) => {
@@ -94,7 +91,6 @@ const getRSS = (link) => {
         } else if (error.response) {
           errors.direction = t('errors.feed.direction');
         }
-        console.log(error.request);
       })
       .then(() => {
         state.form.valid = false;
@@ -103,6 +99,22 @@ const getRSS = (link) => {
       });
   });
 };
+
+const updateValidationState = () => (
+  validate(state.feed.channels, state.form.urlField)
+    .then((errors) => {
+      state.form.errors = errors;
+      state.form.valid = isEqual(errors, {});
+    })
+);
+
+const form = document.getElementById('form');
+const field = document.getElementById('url-address');
+
+field.addEventListener('input', (e) => {
+  state.form.urlField = e.target.value;
+  updateValidationState();
+});
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
