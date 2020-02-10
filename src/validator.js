@@ -16,7 +16,7 @@ const isAdded = (list, item) => {
 const validate = (urlList, urlAddress) => (
   i18next.init({
     lng: 'en',
-    debug: true,
+    debug: false,
     resources,
   }).then((t) => {
     const errors = {};
