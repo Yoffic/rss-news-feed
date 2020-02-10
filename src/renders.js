@@ -6,6 +6,9 @@ export default (state) => {
   const field = document.getElementById('url-address');
   const button = subscribeForm.querySelector('button[type="submit"]');
   const banner = document.querySelector('.jumbotron');
+  const contentArea = document.createElement('div');
+  contentArea.classList.add('container');
+  banner.after(contentArea);
 
   watch(form, 'errors', () => {
     const errorElement = field.nextElementSibling;
@@ -21,8 +24,8 @@ export default (state) => {
     const feedbackMessage = document.createElement('div');
     feedbackMessage.classList.add('invalid-feedback');
     feedbackMessage.innerHTML = errMessage;
-    field.classList.add('is-invalid');
     field.after(feedbackMessage);
+    field.classList.add('is-invalid');
   });
 
   watch(form, 'valid', () => {
@@ -75,6 +78,8 @@ export default (state) => {
 
       const feedChannel = document.createElement('div');
       feedChannel.id = channel.id;
+      contentArea.appendChild(feedChannel);
+
       const title = document.createElement('h2');
       title.innerHTML = channel.title;
       feedChannel.appendChild(title);
@@ -84,6 +89,8 @@ export default (state) => {
       feedChannel.appendChild(description);
 
       const news = document.createElement('ul');
+      feedChannel.appendChild(news);
+
       const [feedRSS] = items.filter((item) => item.id === channel.id);
       feedRSS.links.forEach((item) => {
         const listItem = document.createElement('li');
@@ -93,9 +100,6 @@ export default (state) => {
         link.href = item.link;
         listItem.appendChild(link);
       });
-      feedChannel.appendChild(news);
-
-      banner.after(feedChannel);
     });
   });
 };
