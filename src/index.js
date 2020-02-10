@@ -39,7 +39,6 @@ const createFeedData = (link, data) => {
 
 const updateFeedData = (id, data) => {
   const [dataToUpdate] = state.feed.data.items.filter((item) => item.id === id);
-  console.log(dataToUpdate);
   data.items.forEach((element) => {
     const [newLink] = dataToUpdate.links.filter((item) => isEqual(item, element));
     if (!newLink) {
@@ -52,7 +51,6 @@ const updateFeedData = (id, data) => {
 
 const addFeedData = (link, feedData) => {
   const [addedChannel] = state.feed.channels.filter((channel) => channel.link === link);
-  console.log(addedChannel);
   if (addedChannel) {
     updateFeedData(addedChannel.id, feedData);
   } else {
