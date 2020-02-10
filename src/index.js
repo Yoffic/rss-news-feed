@@ -10,15 +10,15 @@ import validate from './validator';
 const state = {
   form: {
     processState: 'filling',
-    urlField: '',
+    field: '',
     valid: false,
     errors: {},
   },
   feed: {
-    channels: [],
+    urls: [],
     data: {
-      names: [],
-      items: [],
+      channels: [],
+      news: [],
     },
     errors: {},
   },
@@ -26,33 +26,33 @@ const state = {
 
 const createFeedData = (link, data) => {
   const id = uniqueId();
-  const name = {
+  const channel = {
     id,
     title: data.title,
     description: data.desc,
   };
-  const items = { id, links: data.items };
-  state.feed.channels = [{ link, id }, ...state.feed.channels];
-  state.feed.data.names = [name, ...state.feed.data.names];
-  state.feed.data.items = [items, ...state.feed.data.items];
+  const news = { id, items: data.items };
+  state.feed.urls = [{ id, link }, ...state.feed.urls];
+  state.feed.data.channels = [channel, ...state.feed.data.channels];
+  state.feed.data.news = [news, ...state.feed.data.news];
 };
 
 const updateFeedData = (id, data) => {
-  const [dataToUpdate] = state.feed.data.items.filter((item) => item.id === id);
-  data.items.forEach((element) => {
-    const [newLink] = dataToUpdate.links.filter((item) => isEqual(item, element));
-    if (!newLink) {
-      dataToUpdate.links = [element, ...dataToUpdate.links];
+  const [dataToUpdate] = state.feed.data.news.filter((newsItem) => newsItem.id === id);
+  data.items.forEach((item) => {
+    const [matchedNews] = dataToUpdate.links.filter((newsItem) => isEqual(newsItem, item));
+    if (!matchedNews) {
+      dataToUpdate.links = [item, ...dataToUpdate.links];
     }
   });
-  const unchangedItems = state.feed.data.items.filter((item) => item.id !== id);
-  state.feed.data.items = [dataToUpdate, ...unchangedItems];
+  const unchangedNews = state.feed.data.news.filter((newsItem) => newsItem.id !== id);
+  state.feed.data.news = [dataToUpdate, ...unchangedNews];
 };
 
 const addFeedData = (link, feedData) => {
-  const [addedChannel] = state.feed.channels.filter((channel) => channel.link === link);
-  if (addedChannel) {
-    updateFeedData(addedChannel.id, feedData);
+  const [addedUrl] = state.feed.urls.filter((url) => url.link === link);
+  if (addedUrl) {
+    updateFeedData(addedUrl.id, feedData);
   } else {
     createFeedData(link, feedData);
   }
@@ -99,7 +99,7 @@ const getRSS = (link) => {
 };
 
 const updateValidationState = () => (
-  validate(state.feed.channels, state.form.urlField)
+  validate(state.feed.urls, state.form.field)
     .then((errors) => {
       state.form.errors = errors;
       state.form.valid = isEqual(errors, {});
@@ -110,15 +110,15 @@ const form = document.getElementById('form');
 const field = document.getElementById('url-address');
 
 field.addEventListener('input', (e) => {
-  state.form.urlField = e.target.value;
+  state.form.field = e.target.value;
   updateValidationState();
 });
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   state.form.processState = 'sending';
-  const link = state.form.urlField;
-  state.form.urlField = '';
+  const link = state.form.field;
+  state.form.field = '';
   getRSS(link);
 });
 

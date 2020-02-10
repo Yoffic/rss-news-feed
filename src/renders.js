@@ -13,7 +13,7 @@ export default (state) => {
   watch(form, 'errors', () => {
     const errorElement = field.nextElementSibling;
     const errMessage = Object.values(form.errors).flat();
-    const value = form.urlField;
+    const value = form.field;
     if (errorElement) {
       field.classList.remove('is-invalid');
       errorElement.remove();
@@ -32,8 +32,8 @@ export default (state) => {
     button.disabled = !form.valid;
   });
 
-  watch(form, 'urlField', () => {
-    field.value = form.urlField;
+  watch(form, 'field', () => {
+    field.value = form.field;
   });
 
   watch(form, 'processState', () => {
@@ -68,9 +68,9 @@ export default (state) => {
     subscribeForm.after(feedbackMessage);
   });
 
-  watch(feed.data, 'items', () => {
-    const { names, items } = feed.data;
-    names.forEach((channel) => {
+  watch(feed.data, 'news', () => {
+    const { channels, news } = feed.data;
+    channels.forEach((channel) => {
       const feedElement = document.getElementById(channel.id);
       if (feedElement) {
         feedElement.remove();
@@ -88,17 +88,17 @@ export default (state) => {
       description.innerHTML = channel.description;
       feedChannel.appendChild(description);
 
-      const news = document.createElement('ul');
-      feedChannel.appendChild(news);
+      const feedNews = document.createElement('ul');
+      feedChannel.appendChild(feedNews);
 
-      const [feedRSS] = items.filter((item) => item.id === channel.id);
-      feedRSS.links.forEach((item) => {
-        const listItem = document.createElement('li');
-        news.appendChild(listItem);
+      const [feedRSS] = news.filter((newsItem) => newsItem.id === channel.id);
+      feedRSS.items.forEach((newsItem) => {
+        const listElement = document.createElement('li');
+        feedNews.appendChild(listElement);
         const link = document.createElement('a');
-        link.innerHTML = item.title;
-        link.href = item.link;
-        listItem.appendChild(link);
+        link.innerHTML = newsItem.title;
+        link.href = newsItem.link;
+        listElement.appendChild(link);
       });
     });
   });
