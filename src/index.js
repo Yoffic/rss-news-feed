@@ -1,6 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import { isEqual, uniqueId } from 'lodash';
 import axios from 'axios';
+import i18next from 'i18next';
+import resources from './locales';
 import render from './renders';
 import parseRSS from './parser';
 import validate from './validator';
@@ -39,12 +41,6 @@ field.addEventListener('input', (e) => {
   updateValidationState(state);
 });
 
-const errorFeedMessages = {
-  data: 'Check the RSS channel. There is no RSS data for display.',
-  direction: 'URL not found. Please try again.',
-  base: 'Network problems. Please try again.',
-};
-
 const addFeedData = (link, feedData) => {
   const [addedChannel] = state.feed.channels.filter((channel) => channel.link === link);
   if (addedChannel) {
@@ -73,33 +69,39 @@ const getRSS = (link) => {
   const requestUrl = `${proxy}/${link}`;
   const errors = {};
 
-  axios.get(requestUrl)
-    .then((response) => {
-      const feedData = parseRSS(response.data);
-      if (!feedData) {
-        errors.data = errorFeedMessages.data;
-        state.form.processState = 'finished';
+  i18next.init({
+    lng: 'en',
+    debug: true,
+    resources,
+  }).then((t) => {
+    axios.get(requestUrl)
+      .then((response) => {
+        const feedData = parseRSS(response.data);
+        if (!feedData) {
+          errors.data = t('errors.feed.data');
+          state.form.processState = 'finished';
+          state.form.valid = false;
+        } else {
+          state.form.processState = 'finished';
+          state.form.valid = false;
+          addFeedData(link, feedData);
+          setTimeout(() => getRSS(link), 30000);
+        }
+      })
+      .catch((error) => {
+        if (error.request) {
+          errors.base = t('errors.feed.base');
+        } else if (error.response) {
+          errors.direction = t('errors.feed.direction');
+        }
+        console.log(error.request);
+      })
+      .then(() => {
         state.form.valid = false;
-      } else {
         state.form.processState = 'finished';
-        state.form.valid = false;
-        addFeedData(link, feedData);
-        setTimeout(() => getRSS(link), 60000);
-      }
-    })
-    .catch((error) => {
-      if (error.request) {
-        errors.base = errorFeedMessages.base;
-      } else if (error.response) {
-        errors.direction = errorFeedMessages.direction;
-      }
-      console.log(error.request);
-    })
-    .then(() => {
-      state.form.valid = false;
-      state.form.processState = 'finished';
-      state.feed.errors = errors;
-    });
+        state.feed.errors = errors;
+      });
+  });
 };
 
 form.addEventListener('submit', (e) => {
