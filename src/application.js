@@ -8,9 +8,9 @@ import render from './renders';
 import parseRSS from './parser';
 import validate from './validator';
 
-const updateValidationState = (state, texts) => {
+const updateValidationState = (state) => {
   const { feed, form } = state;
-  return validate(feed.urls, form.field, texts)
+  return validate(feed.urls, form.field)
     .then((errors) => {
       form.errors = errors;
       form.valid = isEqual(errors, {});
@@ -53,7 +53,7 @@ const addFeedData = (url, feedData, state) => {
 
 const proxy = 'https://cors-anywhere.herokuapp.com';
 
-const getRSS = (url, texts, state) => {
+const getRSS = (url, state) => {
   const requestUrl = `${proxy}/${url}`;
   const { form, feed } = state;
   const errors = {};
@@ -62,21 +62,21 @@ const getRSS = (url, texts, state) => {
     .then((response) => {
       const feedData = parseRSS(response.data);
       if (!feedData) {
-        errors.data = texts('errors.feed.data');
+        errors.data = 'data';
         form.processState = 'finished';
         form.valid = false;
       } else {
         form.processState = 'finished';
         form.valid = false;
         addFeedData(url, feedData, state);
-        setTimeout(() => getRSS(url, texts, state), 5000);
+        setTimeout(() => getRSS(url, state), 5000);
       }
     })
     .catch((error) => {
-      if (error.request) {
-        errors.base = texts('errors.feed.base');
-      } else if (error.response) {
-        errors.direction = texts('errors.feed.direction');
+      if (error.response) {
+        errors.direction = 'direction';
+      } else if (error.request) {
+        errors.base = 'base';
       }
     })
     .then(() => {
@@ -87,45 +87,45 @@ const getRSS = (url, texts, state) => {
 };
 
 export default () => {
+  const state = {
+    form: {
+      processState: 'filling',
+      field: '',
+      valid: false,
+      errors: {},
+    },
+    feed: {
+      urls: [],
+      data: {
+        channels: [],
+        news: [],
+      },
+      errors: {},
+    },
+  };
+
+  const form = document.getElementById('form');
+  const field = document.getElementById('url-address');
+
+  field.addEventListener('input', (e) => {
+    state.form.field = e.target.value;
+    updateValidationState(state);
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const url = formData.get('url');
+    state.form.processState = 'sending';
+    state.form.field = '';
+    getRSS(url, state);
+  });
+
   i18next.init({
     lng: 'en',
     debug: false,
     resources,
   }).then((t) => {
-    const state = {
-      form: {
-        processState: 'filling',
-        field: '',
-        valid: false,
-        errors: {},
-      },
-      feed: {
-        urls: [],
-        data: {
-          channels: [],
-          news: [],
-        },
-        errors: {},
-      },
-    };
-
-    const form = document.getElementById('form');
-    const field = document.getElementById('url-address');
-
-    field.addEventListener('input', (e) => {
-      state.form.field = e.target.value;
-      updateValidationState(state, t);
-    });
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const url = formData.get('url');
-      state.form.processState = 'sending';
-      state.form.field = '';
-      getRSS(url, t, state);
-    });
-
-    render(state);
+    render(state, t);
   });
 };

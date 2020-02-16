@@ -12,15 +12,15 @@ const isAdded = (list, url) => {
   return !!result;
 };
 
-const validate = (urlList, urlAddress, texts) => {
+const validate = (urlList, urlAddress) => {
   const errors = {};
   return isValid(urlAddress)
     .then((valid) => {
       if (!valid) {
-        errors.url = texts('errors.input.url');
+        errors.url = 'url';
       }
       if (isAdded(urlList, urlAddress)) {
-        errors.repetition = texts('errors.input.repetition');
+        errors.repetition = 'repetition';
       }
       return errors;
     });
