@@ -29,9 +29,9 @@ const createFeedData = (url, data, state) => {
 
 const updateFeedData = (id, currentNews, state) => {
   const previousNews = find(state.feed.data.news, ['id', id]);
-  const [newItem] = differenceBy(currentNews.items, previousNews.items, 'title');
-  if (newItem) {
-    const updatedNews = [newItem, ...previousNews.items];
+  const newItems = differenceBy(currentNews.items, previousNews.items, 'title');
+  if (newItems.length !== 0) {
+    const updatedNews = { id, items: [...newItems, ...previousNews.items] };
     const unchangedNews = filter(state.feed.data.news, (el) => el.id !== id);
     state.feed.data.news = [updatedNews, ...unchangedNews];
   }
