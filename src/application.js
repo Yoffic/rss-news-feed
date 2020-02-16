@@ -1,4 +1,6 @@
-import { isEqual, uniqueId, differenceBy, filter, find } from 'lodash';
+import {
+  filter, find, isEqual, uniqueId, differenceBy,
+} from 'lodash';
 import axios from 'axios';
 import i18next from 'i18next';
 import resources from './locales';
@@ -6,15 +8,17 @@ import render from './renders';
 import parseRSS from './parser';
 import validate from './validator';
 
-const updateValidationState = (state, texts) => (
-  validate(state.feed.urls, state.form.field, texts)
+const updateValidationState = (state, texts) => {
+  const { feed, form } = state;
+  return validate(feed.urls, form.field, texts)
     .then((errors) => {
-      state.form.errors = errors;
-      state.form.valid = isEqual(errors, {});
-    })
-);
+      form.errors = errors;
+      form.valid = isEqual(errors, {});
+    });
+};
 
 const createFeedData = (url, data, state) => {
+  const { feed } = state;
   const id = uniqueId();
   const channel = {
     id,
@@ -22,18 +26,19 @@ const createFeedData = (url, data, state) => {
     description: data.desc,
   };
   const news = { id, items: data.items };
-  state.feed.urls = [{ id, url }, ...state.feed.urls];
-  state.feed.data.channels = [channel, ...state.feed.data.channels];
-  state.feed.data.news = [news, ...state.feed.data.news];
+  feed.urls = [{ id, url }, ...feed.urls];
+  feed.data.channels = [channel, ...feed.data.channels];
+  feed.data.news = [news, ...feed.data.news];
 };
 
 const updateFeedData = (id, currentNews, state) => {
-  const previousNews = find(state.feed.data.news, ['id', id]);
+  const { feed } = state;
+  const previousNews = find(feed.data.news, ['id', id]);
   const newItems = differenceBy(currentNews.items, previousNews.items, 'title');
   if (newItems.length !== 0) {
     const updatedNews = { id, items: [...newItems, ...previousNews.items] };
-    const unchangedNews = filter(state.feed.data.news, (el) => el.id !== id);
-    state.feed.data.news = [updatedNews, ...unchangedNews];
+    const unchangedNews = filter(feed.data.news, (el) => el.id !== id);
+    feed.data.news = [updatedNews, ...unchangedNews];
   }
 };
 
@@ -50,6 +55,7 @@ const proxy = 'https://cors-anywhere.herokuapp.com';
 
 const getRSS = (url, texts, state) => {
   const requestUrl = `${proxy}/${url}`;
+  const { form, feed } = state;
   const errors = {};
 
   axios.get(requestUrl)
@@ -57,11 +63,11 @@ const getRSS = (url, texts, state) => {
       const feedData = parseRSS(response.data);
       if (!feedData) {
         errors.data = texts('errors.feed.data');
-        state.form.processState = 'finished';
-        state.form.valid = false;
+        form.processState = 'finished';
+        form.valid = false;
       } else {
-        state.form.processState = 'finished';
-        state.form.valid = false;
+        form.processState = 'finished';
+        form.valid = false;
         addFeedData(url, feedData, state);
         setTimeout(() => getRSS(url, texts, state), 5000);
       }
@@ -74,11 +80,10 @@ const getRSS = (url, texts, state) => {
       }
     })
     .then(() => {
-      state.form.valid = false;
-      state.form.processState = 'finished';
-      state.feed.errors = errors;
+      form.valid = false;
+      form.processState = 'finished';
+      feed.errors = errors;
     });
-
 };
 
 export default () => {
