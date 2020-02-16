@@ -1,6 +1,6 @@
 import { watch } from 'melanke-watchjs';
 
-export default (state) => {
+export default (state, texts) => {
   const { feed, form } = state;
   const subscribeForm = document.getElementById('form');
   const field = document.getElementById('url-address');
@@ -12,18 +12,18 @@ export default (state) => {
 
   watch(form, 'errors', () => {
     const errorElement = field.nextElementSibling;
-    const errMessage = Object.values(form.errors).flat();
+    const errors = Object.keys(form.errors);
     const value = form.field;
     if (errorElement) {
       field.classList.remove('is-invalid');
       errorElement.remove();
     }
-    if (!errMessage.length || !value.length) {
+    if (errors.length === 0 || value === '') {
       return;
     }
     const feedbackMessage = document.createElement('div');
     feedbackMessage.classList.add('invalid-feedback');
-    feedbackMessage.innerHTML = errMessage;
+    feedbackMessage.innerHTML = errors.map((type) => texts(`errors.input.${type}`)).flat();
     field.after(feedbackMessage);
     field.classList.add('is-invalid');
   });
@@ -54,17 +54,17 @@ export default (state) => {
 
   watch(feed, 'errors', () => {
     const errorElement = subscribeForm.nextElementSibling;
-    const errMessage = Object.values(feed.errors).flat();
+    const errors = Object.keys(feed.errors);
     if (errorElement) {
       errorElement.remove();
     }
-    if (!errMessage.length) {
+    if (errors.length === 0) {
       return;
     }
     const feedbackMessage = document.createElement('div');
     feedbackMessage.classList.add('alert', 'alert-warning');
     feedbackMessage.setAttribute('role', 'alert');
-    feedbackMessage.innerHTML = errMessage;
+    feedbackMessage.innerHTML = errors.map((type) => texts(`errors.feed.${type}`)).flat();
     subscribeForm.after(feedbackMessage);
   });
 
