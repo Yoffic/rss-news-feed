@@ -76,28 +76,34 @@ export default (state) => {
         feedElement.remove();
       }
 
-      const feedChannel = document.createElement('div');
+      const feedChannel = document.createElement('section');
       feedChannel.id = channel.id;
+      feedChannel.classList.add('my-5');
       contentArea.appendChild(feedChannel);
 
       const title = document.createElement('h2');
       title.innerHTML = channel.title;
+      title.classList.add('h4');
       feedChannel.appendChild(title);
 
       const description = document.createElement('p');
+      description.classList.add('lead');
       description.innerHTML = channel.description;
       feedChannel.appendChild(description);
 
       const feedNews = document.createElement('ul');
+      feedNews.classList.add('list-unstyled');
       feedChannel.appendChild(feedNews);
 
       const [feedRSS] = news.filter((newsItem) => newsItem.id === channel.id);
       feedRSS.items.forEach((newsItem) => {
         const listElement = document.createElement('li');
+        listElement.classList.add('my-3');
         feedNews.appendChild(listElement);
         const link = document.createElement('a');
         link.innerHTML = newsItem.title;
         link.href = newsItem.link;
+        link.classList.add('text-decoration-none', 'text-info');
         listElement.appendChild(link);
       });
     });
