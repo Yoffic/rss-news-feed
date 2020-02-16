@@ -1,4 +1,4 @@
-import { isEqual, uniqueId } from 'lodash';
+import { isEqual, uniqueId, differenceBy, filter, find } from 'lodash';
 import axios from 'axios';
 import i18next from 'i18next';
 import resources from './locales';
@@ -27,20 +27,18 @@ const createFeedData = (url, data, state) => {
   state.feed.data.news = [news, ...state.feed.data.news];
 };
 
-const updateFeedData = (id, data, state) => {
-  const [dataToUpdate] = state.feed.data.news.filter((newsItem) => newsItem.id === id);
-  data.items.forEach((item) => {
-    const [matchedNews] = dataToUpdate.items.filter((newsItem) => isEqual(newsItem, item));
-    if (!matchedNews) {
-      dataToUpdate.items = [item, ...dataToUpdate.items];
-    }
-  });
-  const unchangedNews = state.feed.data.news.filter((newsItem) => newsItem.id !== id);
-  state.feed.data.news = [dataToUpdate, ...unchangedNews];
+const updateFeedData = (id, currentNews, state) => {
+  const previousNews = find(state.feed.data.news, ['id', id]);
+  const [newItem] = differenceBy(currentNews.items, previousNews.items, 'title');
+  if (newItem) {
+    const updatedNews = [newItem, ...previousNews.items];
+    const unchangedNews = filter(state.feed.data.news, (el) => el.id !== id);
+    state.feed.data.news = [updatedNews, ...unchangedNews];
+  }
 };
 
 const addFeedData = (url, feedData, state) => {
-  const [addedUrl] = state.feed.urls.filter((channel) => channel.url === url);
+  const addedUrl = find(state.feed.urls, ['url', url]);
   if (addedUrl) {
     updateFeedData(addedUrl.id, feedData, state);
   } else {

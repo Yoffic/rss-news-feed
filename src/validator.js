@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import { find } from 'lodash';
 
 const checkoutUrl = yup.string().url().required();
 
@@ -7,8 +8,8 @@ const isValid = (url) => (
 );
 
 const isAdded = (list, url) => {
-  const [result] = list.filter((elem) => elem.url === url);
-  return result !== undefined;
+  const result = find(list, ['url', url]);
+  return !!result;
 };
 
 const validate = (urlList, urlAddress, texts) => {
