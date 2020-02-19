@@ -43,9 +43,11 @@ export default (state, texts) => {
         button.disabled = false;
         break;
       case 'sending':
+        field.disabled = true;
         button.disabled = true;
         break;
       case 'finished':
+        field.disabled = false;
         break;
       default:
         throw new Error(`Unknown state: ${processState}`);
@@ -95,7 +97,7 @@ export default (state, texts) => {
       feedNews.classList.add('list-unstyled');
       feedChannel.appendChild(feedNews);
 
-      const [feedRSS] = news.filter((newsItem) => newsItem.id === channel.id);
+      const feedRSS = news.find((newsItem) => newsItem.id === channel.id);
       feedRSS.items.forEach((newsItem) => {
         const listElement = document.createElement('li');
         listElement.classList.add('my-3');
