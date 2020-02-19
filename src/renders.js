@@ -70,8 +70,8 @@ export default (state, texts) => {
     subscribeForm.after(feedbackMessage);
   });
 
-  watch(feed.data, 'news', () => {
-    const { channels, news } = feed.data;
+  watch(feed, 'news', () => {
+    const { channels, news } = feed;
     channels.forEach((channel) => {
       const feedElement = document.getElementById(channel.id);
       if (feedElement) {

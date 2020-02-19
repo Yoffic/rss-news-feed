@@ -27,18 +27,18 @@ const createFeedData = (url, data, state) => {
   };
   const news = { id, items: data.items };
   feed.urls = [{ id, url }, ...feed.urls];
-  feed.data.channels = [channel, ...feed.data.channels];
-  feed.data.news = [news, ...feed.data.news];
+  feed.channels = [channel, ...feed.channels];
+  feed.news = [news, ...feed.news];
 };
 
 const updateFeedData = (id, currentNews, state) => {
   const { feed } = state;
-  const previousNews = find(feed.data.news, ['id', id]);
+  const previousNews = find(feed.news, ['id', id]);
   const newItems = differenceBy(currentNews.items, previousNews.items, 'title');
   if (newItems.length !== 0) {
     const updatedNews = { id, items: [...newItems, ...previousNews.items] };
-    const unchangedNews = filter(feed.data.news, (el) => el.id !== id);
-    feed.data.news = [updatedNews, ...unchangedNews];
+    const unchangedNews = filter(feed.news, (el) => el.id !== id);
+    feed.news = [updatedNews, ...unchangedNews];
   }
 };
 
@@ -97,10 +97,8 @@ export default () => {
     },
     feed: {
       urls: [],
-      data: {
-        channels: [],
-        news: [],
-      },
+      channels: [],
+      news: [],
       errors: {},
     },
   };
