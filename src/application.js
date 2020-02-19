@@ -63,10 +63,11 @@ const getRSS = (url, state) => {
       const feedData = parseRSS(response.data);
       if (!feedData) {
         errors.data = 'data';
-        form.processState = 'finished';
+        form.processState = 'filling';
         form.valid = false;
       } else {
         form.processState = 'finished';
+        state.form.field = '';
         form.valid = false;
         addFeedData(url, feedData, state);
         setTimeout(() => getRSS(url, state), 5000);
@@ -117,7 +118,6 @@ export default () => {
     const formData = new FormData(e.target);
     const url = formData.get('url');
     state.form.processState = 'sending';
-    state.form.field = '';
     getRSS(url, state);
   });
 
