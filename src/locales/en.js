@@ -6,9 +6,9 @@ export default {
         repetition: 'This URL has already been added.',
       },
       feed: {
-        data: 'Check the RSS channel. There is no RSS data for display.',
-        direction: 'URL not found. Please try again.',
-        base: 'Network problems. Please try again.',
+        wrongData: 'Check the RSS channel. There is no RSS data for display.',
+        access: 'URL could not be reached. Please try again.',
+        network: 'Network problems. Please try again.',
       },
     },
   },
