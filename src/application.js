@@ -1,5 +1,5 @@
 import {
-  filter, find, isEqual, uniqueId, differenceBy,
+  find, uniqueId, differenceBy,
 } from 'lodash';
 import axios from 'axios';
 import i18next from 'i18next';
@@ -10,15 +10,18 @@ import validate from './validator';
 
 const updateValidationState = (state) => {
   const { feed, form } = state;
-  return validate(feed.urls, form.field)
-    .then((errors) => {
-      form.errors = errors;
-      form.valid = isEqual(errors, {});
-    });
+  try {
+    validate(feed.urls, form.field);
+    form.valid = true;
+    form.errors = [];
+  } catch (error) {
+   form.valid = false;
+   form.errors = [error.type];
+  }
 };
 
 const createFeedData = (url, data, state) => {
-  const { feed } = state;
+  const { feed, form } = state;
   const id = uniqueId();
   const channel = {
     id,
@@ -26,19 +29,19 @@ const createFeedData = (url, data, state) => {
     description: data.desc,
   };
   const news = { id, items: data.items };
-  feed.urls = [{ id, url }, ...feed.urls];
-  feed.channels = [channel, ...feed.channels];
-  feed.news = [news, ...feed.news];
+  feed.urls.push({ id, url });
+  feed.channels.unshift(channel);
+  feed.news.push(news);
+  feed.state = 'success';
+  form.field = '';
 };
 
 const updateFeedData = (id, currentNews, state) => {
   const { feed } = state;
-  const previousNews = find(feed.news, ['id', id]);
-  const newItems = differenceBy(currentNews.items, previousNews.items, 'title');
+  const newsToUpdate = find(feed.news, ['id', id]);
+  const newItems = differenceBy(currentNews.items, newsToUpdate.items, 'title');
   if (newItems.length !== 0) {
-    const updatedNews = { id, items: [...newItems, ...previousNews.items] };
-    const unchangedNews = filter(feed.news, (el) => el.id !== id);
-    feed.news = [updatedNews, ...unchangedNews];
+    newsToUpdate.items.unshift(...newItems);
   }
 };
 
@@ -56,34 +59,23 @@ const proxy = 'https://cors-anywhere.herokuapp.com';
 const getRSS = (url, state) => {
   const requestUrl = `${proxy}/${url}`;
   const { form, feed } = state;
-  const errors = {};
-
+  feed.state = '';
+  
   axios.get(requestUrl)
     .then((response) => {
       const feedData = parseRSS(response.data);
-      if (!feedData) {
-        errors.data = 'data';
-        form.processState = 'filling';
-        form.valid = false;
-      } else {
-        form.processState = 'finished';
-        state.form.field = '';
-        form.valid = false;
-        addFeedData(url, feedData, state);
-        setTimeout(() => getRSS(url, state), 5000);
-      }
+      form.processState = 'finished';
+      addFeedData(url, feedData, state);
+      setTimeout(() => getRSS(url, state), 5000);
     })
     .catch((error) => {
-      if (error.response) {
-        errors.direction = 'direction';
-      } else if (error.request) {
-        errors.base = 'base';
+      if (error.request) {
+        feed.errors = error.request.status === 0 ? ['network'] : ['access'];
+      } else {
+        feed.errors = [error.type];
       }
-    })
-    .then(() => {
-      form.valid = false;
-      form.processState = 'finished';
-      feed.errors = errors;
+      form.processState = 'filling';
+      feed.state = 'failed';
     });
 };
 
@@ -93,13 +85,14 @@ export default () => {
       processState: 'filling',
       field: '',
       valid: false,
-      errors: {},
+      errors: [],
     },
     feed: {
+      state: '',
       urls: [],
       channels: [],
       news: [],
-      errors: {},
+      errors: [],
     },
   };
 
