@@ -3,9 +3,7 @@ import { find } from 'lodash';
 
 const checkoutUrl = yup.string().url().required();
 
-const isValid = (url) => (
-  checkoutUrl.isValid(url).then((valid) => valid)
-);
+const isValid = (url) => checkoutUrl.validateSync(url);
 
 const isAdded = (list, url) => {
   const result = find(list, ['url', url]);
@@ -13,17 +11,12 @@ const isAdded = (list, url) => {
 };
 
 const validate = (urlList, urlAddress) => {
-  const errors = {};
-  return isValid(urlAddress)
-    .then((valid) => {
-      if (!valid) {
-        errors.url = 'url';
-      }
-      if (isAdded(urlList, urlAddress)) {
-        errors.repetition = 'repetition';
-      }
-      return errors;
-    });
+  if (isAdded(urlList, urlAddress)) {
+    const error = new Error();
+    error.type = 'repetition';
+    throw error;
+  }
+  return isValid(urlAddress);
 };
 
 export default validate;
