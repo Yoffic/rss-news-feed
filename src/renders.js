@@ -12,15 +12,18 @@ export default (state, texts) => {
 
   watch(form, 'errors', () => {
     const errorElement = field.nextElementSibling;
-    const errors = Object.keys(form.errors);
+    const errors = [...form.errors];
     const value = form.field;
+
     if (errorElement) {
       field.classList.remove('is-invalid');
       errorElement.remove();
     }
+
     if (errors.length === 0 || value === '') {
       return;
     }
+
     const feedbackMessage = document.createElement('div');
     feedbackMessage.classList.add('invalid-feedback');
     feedbackMessage.innerHTML = errors.map((type) => texts(`errors.input.${type}`)).flat();
@@ -40,6 +43,7 @@ export default (state, texts) => {
     const { processState } = form;
     switch (processState) {
       case 'filling':
+        field.disabled = false;
         button.disabled = false;
         break;
       case 'sending':
@@ -48,21 +52,25 @@ export default (state, texts) => {
         break;
       case 'finished':
         field.disabled = false;
+        button.disabled = false;
         break;
       default:
         throw new Error(`Unknown state: ${processState}`);
     }
   });
 
-  watch(feed, 'errors', () => {
+  watch(feed, 'state', () => {
     const errorElement = subscribeForm.nextElementSibling;
-    const errors = Object.keys(feed.errors);
+    const errors = [...feed.errors];
+
     if (errorElement) {
       errorElement.remove();
     }
+
     if (errors.length === 0) {
       return;
     }
+
     const feedbackMessage = document.createElement('div');
     feedbackMessage.classList.add('alert', 'alert-warning');
     feedbackMessage.setAttribute('role', 'alert');
@@ -72,6 +80,7 @@ export default (state, texts) => {
 
   watch(feed, 'news', () => {
     const { channels, news } = feed;
+
     channels.forEach((channel) => {
       const feedElement = document.getElementById(channel.id);
       if (feedElement) {
