@@ -15,8 +15,8 @@ const updateValidationState = (state) => {
     form.valid = true;
     form.errors = [];
   } catch (error) {
-   form.valid = false;
-   form.errors = [error.type];
+    form.valid = false;
+    form.errors = [error.type];
   }
 };
 
@@ -60,7 +60,7 @@ const getRSS = (url, state) => {
   const requestUrl = `${proxy}/${url}`;
   const { form, feed } = state;
   feed.state = '';
-  
+
   axios.get(requestUrl)
     .then((response) => {
       const feedData = parseRSS(response.data);
