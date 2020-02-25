@@ -3,7 +3,7 @@ export default {
     errors: {
       input: {
         url: 'Invalid URL',
-        repetition: 'This URL has already been added.',
+        notOneOf: 'This URL has already been added.',
       },
       feed: {
         wrongData: 'Check the RSS channel. There is no RSS data for display.',
