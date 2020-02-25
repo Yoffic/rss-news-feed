@@ -52,7 +52,7 @@ export default (state, texts) => {
         break;
       case 'finished':
         field.disabled = false;
-        button.disabled = false;
+        button.disabled = true;
         break;
       default:
         throw new Error(`Unknown state: ${processState}`);
