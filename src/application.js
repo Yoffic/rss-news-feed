@@ -10,8 +10,9 @@ import validate from './validator';
 
 const updateValidationState = (state) => {
   const { feed, form } = state;
+  const urlList = feed.urls.map(({ url }) => url);
   try {
-    validate(feed.urls, form.field);
+    validate(form.field, urlList);
     form.valid = true;
     form.errors = [];
   } catch (error) {
@@ -21,7 +22,7 @@ const updateValidationState = (state) => {
 };
 
 const createFeedData = (url, data, state) => {
-  const { feed, form } = state;
+  const { feed } = state;
   const id = uniqueId();
   const channel = {
     id,
@@ -32,8 +33,6 @@ const createFeedData = (url, data, state) => {
   feed.urls.push({ id, url });
   feed.channels.unshift(channel);
   feed.news.push(news);
-  feed.state = 'success';
-  form.field = '';
 };
 
 const updateFeedData = (id, currentNews, state) => {
@@ -46,11 +45,14 @@ const updateFeedData = (id, currentNews, state) => {
 };
 
 const addFeedData = (url, feedData, state) => {
-  const addedUrl = find(state.feed.urls, ['url', url]);
+  const { form, feed } = state;
+  const addedUrl = find(feed.urls, ['url', url]);
   if (addedUrl) {
     updateFeedData(addedUrl.id, feedData, state);
   } else {
     createFeedData(url, feedData, state);
+    feed.state = 'success';
+    form.field = '';
   }
 };
 
@@ -109,6 +111,7 @@ export default () => {
     const formData = new FormData(e.target);
     const url = formData.get('url');
     state.form.processState = 'sending';
+    state.feed.errors = [];
     getRSS(url, state);
   });
 
