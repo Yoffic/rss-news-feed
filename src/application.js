@@ -57,6 +57,7 @@ const addFeedData = (url, feedData, state) => {
 };
 
 const proxy = 'https://cors-anywhere.herokuapp.com';
+const updateFeedInterval = 30000;
 
 const getRSS = (url, state) => {
   const requestUrl = `${proxy}/${url}`;
@@ -68,7 +69,7 @@ const getRSS = (url, state) => {
       const feedData = parseRSS(response.data);
       form.processState = 'finished';
       addFeedData(url, feedData, state);
-      setTimeout(() => getRSS(url, state), 5000);
+      setTimeout(() => getRSS(url, state), updateFeedInterval);
     })
     .catch((error) => {
       if (error.request) {
